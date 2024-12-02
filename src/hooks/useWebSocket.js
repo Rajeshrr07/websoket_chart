@@ -1,24 +1,30 @@
-import { useEffect } from "react";
-import { useDashboardStore } from "../store/dashboardStore";
+import { useEffect } from 'react';
+import useOrderBookStore from '../store/orderBookStore';
 
-const useWebSocket = (url) => {
+const useWebSocket = (url, timeframe) => {
+  const updateOrderBook = useOrderBookStore((state) => state.updateOrderBook);
+  const updateConnectionStatus = useOrderBookStore((state) => state.updateConnectionStatus);
+
   useEffect(() => {
     const ws = new WebSocket(url);
+
+    ws.onopen = () => {
+      updateConnectionStatus('connected');
+      ws.send(JSON.stringify({ type: 'setTimeFilter', data: timeframe }));  
+    };
+
     ws.onmessage = (event) => {
       const data = JSON.parse(event.data);
-      useDashboardStore.getState().setMetrics(data);
+      updateOrderBook(data);
     };
 
-    ws.onerror = () => {
-      useDashboardStore.getState().setError("WebSocket connection error");
-    };
+    ws.onclose = () => updateConnectionStatus('disconnected');
+    ws.onerror = () => updateConnectionStatus('disconnected');
 
-    ws.onclose = () => {
-      console.warn("WebSocket closed.");
+    return () => {
+      ws.close();
     };
-
-    return () => ws.close();
-  }, [url]);
+  }, [url, updateOrderBook, updateConnectionStatus, timeframe]);
 };
 
 export default useWebSocket;

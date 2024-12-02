@@ -1,37 +1,20 @@
-import React, { useEffect } from "react";
-import Navbar from "./components/Navbar";
-import ChartWrapper from "./components/Chart/ChartWrapper";
-import Filters from "./components/Filters";
-import MetricsCard from "./components/MetricsCard";
-import { useDashboardStore}  from "./store/dashboardStore";
+import React from 'react';
+import Dashboard from '../src/Pages/Dashboard.jsx';
+import DetailsPage from './Pages/Details.jsx';
 
-const App = () => {
-  const { metrics, isLoading, error, fetchMetrics } = useDashboardStore();
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
-  useEffect(() => {
-    fetchMetrics();
-  }, [fetchMetrics]);
 
+function App() {
   return (
-    <div className="min-h-screen bg-gray-100">
-      {/* <Navbar /> */}
-      <div className="p-4 max-w-7xl mx-auto">
-        <Filters />
-        {isLoading && <p>Loading...</p>}
-        {error && <p className="text-red-500">Error: {error}</p>}
-        {!isLoading && !error && (
-          <>
-            <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-              {metrics.map((metric, index) => (
-                <MetricsCard key={index} metric={metric} />
-              ))}
-            </div>
-            <ChartWrapper />
-          </>
-        )}
-      </div>
-    </div>
+    <Router>
+    <Routes>
+      <Route path="/" element={<Dashboard />} />
+      <Route path="/details" element={<DetailsPage />} />
+    </Routes>
+  </Router>
+
   );
-};
+}
 
 export default App;
